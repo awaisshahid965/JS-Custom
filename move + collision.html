@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision Detection</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            display: block;
+            background-color: rgba(0, 0, 0, .85);
+        }
+
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+
+    <script>
+
+        const randColor = () => {
+            return (
+                `rgb(${round( rand() * 170 + 80 )}, ${round( rand() * 200 + 50 )}, ${round( rand() * 100 + 150 )})`
+            );
+        };
+
+        const canvas = document.querySelector('canvas');
+        let ctx = canvas.getContext('2d');
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        let rand = Math.random;
+        let round = Math.round;
+
+        onresize = () => {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        };
+
+        // co-ordinates DS for particles
+        let mouse = {
+            x: 10,
+            y: 10
+        }
+
+        // Particles
+        let particlesArray = [];
+
+        class Circle {
+
+            constructor(x, y, radius, color) {
+                this.x = x;
+                this.y = y;
+                this.size = radius;
+                this.fillColor = color;
+            }
+
+            update() {
+                this.draw();
+            }
+
+            draw() {
+                ctx.fillStyle = this.fillColor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        // adding EventListener to canvas
+        canvas.addEventListener('mousemove', event => {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        // detect collision
+        const detectCollision = (obj, obj1) => {
+            let dx = obj1.x - obj.x;
+            let dy = obj1.y - obj.y;
+
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            return distance;
+        };
+
+        // start animation
+        let circle0, circle1;
+        function animate() {
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0,0,0,0.15)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            circle0 = new Circle(innerWidth / 2, innerHeight / 2, 100, 'orange');
+
+            circle1 = new Circle(mouse.x, mouse.y, 30, 'rgb(214, 45, 45)');
+
+            let distance = detectCollision(
+                circle0,
+                circle1
+            );
+
+            if ( (circle0.size + circle1.size) > distance ) {
+                circle0.fillColor = "seagreen";
+            } else {
+                circle0.fillColor = "orange";
+            }
+
+            circle0.update();
+            circle1.update();
+
+        
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+    </script>
+</body>
+</html>
