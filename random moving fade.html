@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        canvas {
+            display: block;
+            /* background-color: rgba(0, 0, 0, .85); */
+            background-color: rgb(214, 45, 45);
+        }
+
+    </style>
+</head>
+<body>
+    <canvas></canvas>
+
+    <script>
+
+        const randColor = () => {
+            return (
+                `rgb(${round( rand() * 170 + 80 )}, ${round( rand() * 200 + 50 )}, ${round( rand() * 100 + 150 )})`
+            );
+        };
+
+        const canvas = document.querySelector('canvas');
+        let ctx = canvas.getContext('2d');
+        canvas.width = innerWidth;
+        canvas.height = innerHeight;
+        let rand = Math.random;
+        let round = Math.round;
+
+        onresize = () => {
+            canvas.width = innerWidth;
+            canvas.height = innerHeight;
+        };
+
+        // co-ordinates DS for particles
+        let mouse = {
+            x: undefined,
+            y: undefined
+        }
+
+        // Particles
+        let particlesArray = [];
+
+        class Particle {
+
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = rand() * 5 + 2;
+                this.speedX = rand() * 1 + 1;
+                this.speedY = rand() * 1 + 1;
+                this.fillColor = randColor();
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                // if (this.size > 0.2) this.size -= 0.1;
+                if(this.x <= 0 || this.x >= innerWidth) {
+                    this.speedX = -this.speedX;
+                }
+
+                if(this.y <= 0 || this.y >= innerHeight) {
+                    this.speedY = -this.speedY;
+                }
+            }
+
+            draw() {
+                // ctx.fillStyle = 'blue';
+                ctx.fillStyle = this.fillColor;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // make particles
+        (() => {
+            for (let i = 0; i < 100; i++) {
+                particlesArray.push(new Particle(
+                    rand() * innerWidth,
+                    rand() * innerHeight
+                ));
+            }
+        })();
+
+        // update particles
+        function handleParticles() {
+            particlesArray.forEach((particle, i) => {
+
+                particle.draw();
+                particle.update();
+
+                // join by line
+                for (let j = 0; j < particlesArray.length - 1; j++) {
+                    const dx = particlesArray[j].x - particlesArray[i].x;
+                    const dy = particlesArray[j].y - particlesArray[i].y;
+                    const distance = Math.sqrt((dx * dx) + (dy * dy));
+
+                    if (distance > 100 && distance < 150) {
+                        ctx.beginPath();
+                        ctx.lineWidth = 1;
+                        ctx.strokeStyle = `rgba(255, 255, 255, ${1 - (distance / 200)})`;
+                        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+                        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            });
+        }
+
+        // start animation
+        function animate() {
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            handleParticles();
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+    </script>
+</body>
+</html>
